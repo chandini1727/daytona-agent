@@ -1,0 +1,20 @@
+# Python cache and environments
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+env/
+
+# Ignore all E2B and local testing scripts to prevent API key leaks!
+agent_template_tester.py
+e2b_terminal.py
+run_e2b.py
+terminal_agent.py
+local_agent_base.py
+run_base_terminal.py
+run_opencode.py
+
+# Ignore any random text or log files
+*.log
+*.txt

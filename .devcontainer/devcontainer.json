@@ -1,0 +1,6 @@
+{
+    "name": "My OpenRouter Agent",
+    "image": "docker.io/chintalachyandini/my-openrouter-agent:1.0",
+    "forwardPorts": [8501],
+    "postStartCommand": "python -m streamlit run /app/app.py --server.port=8501 --server.address=0.0.0.0"
+}
