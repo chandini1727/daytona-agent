@@ -1,6 +1,19 @@
 {
-    "name": "My OpenRouter Agent",
-    "image": "docker.io/chintalachyandini/my-openrouter-agent:1.0",
-    "forwardPorts": [8501],
-    "postStartCommand": "python -m streamlit run /app/app.py --server.port=8501 --server.address=0.0.0.0"
+    "name": "NeevCloud Voice Agent Test",
+    "image": "chintalachyandini/my-openrouter-agent:voice3",
+    "customizations": {
+        "vscode": {
+            "settings": {},
+            "extensions": [
+                "ms-python.python"
+            ]
+        }
+    },
+    "forwardPorts": [8000],
+    "portsAttributes": {
+        "8000": {
+            "label": "Voice API",
+            "onAutoForward": "notify"
+        }
+    }
 }

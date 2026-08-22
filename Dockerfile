@@ -18,6 +18,8 @@ RUN apt-get update \
         less vim nano \
         tmux ncurses-term \
         build-essential cmake pkg-config \
+        ffmpeg \
+        espeak \
     && ln -s "$(command -v fdfind)" /usr/local/bin/fd \
     && rm -rf /var/lib/apt/lists/*
 
@@ -38,8 +40,15 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the agent application code
 COPY app.py .
+COPY terminal_agent.py .
+COPY voice_agent_server.py .
+COPY voice_ui.html .
+COPY pure_voice_agent.py .
 
 # Pass the OpenRouter token securely at runtime using: docker run -e OPENROUTER_API_KEY="..."
 
-# Set the entrypoint to run Streamlit on port 8080
-CMD ["streamlit", "run", "app.py", "--server.port=8080", "--server.address=0.0.0.0"]
+# Expose the voice agent server port
+EXPOSE 8000
+
+# Set the entrypoint to run the FastAPI voice agent server
+CMD ["uvicorn", "pure_voice_agent:app", "--host", "0.0.0.0", "--port", "8000"]
