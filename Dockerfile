@@ -51,4 +51,4 @@ COPY pure_voice_agent.py .
 EXPOSE 8000
 
 # Set the entrypoint to run the FastAPI voice agent server
-CMD ["uvicorn", "pure_voice_agent:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["bash", "-c", "cd /app && uvicorn pure_voice_agent:app --host 0.0.0.0 --port 8000"]

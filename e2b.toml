@@ -1,0 +1,6 @@
+# This is a config for E2B sandbox template.
+# You can use template ID to create a sandbox in E2B SDK.
+
+template_id = "my-openrouter-agent"
+template_name = "my-openrouter-agent"
+dockerfile = "e2b.Dockerfile"
