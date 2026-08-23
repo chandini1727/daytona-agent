@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Agent Demo</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #1e1e2f 0%, #2a2a40 100%);
+            color: #ffffff;
+        }
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        p.subtitle {
+            color: #b0b0c0;
+            margin-bottom: 30px;
+        }
+        .mic-btn {
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            font-size: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+        }
+        .mic-btn:hover {
+            transform: scale(1.05);
+            background-color: #ff6b81;
+        }
+        .mic-btn.listening {
+            animation: pulse 1.5s infinite;
+            background-color: #2ed573;
+            box-shadow: 0 4px 15px rgba(46, 213, 115, 0.4);
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(46, 213, 115, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 20px rgba(46, 213, 115, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(46, 213, 115, 0); }
+        }
+        .status {
+            margin-top: 30px;
+            min-height: 24px;
+            font-weight: 500;
+            color: #a4b0be;
+        }
+        .transcript-box {
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            min-height: 80px;
+            text-align: left;
+            word-wrap: break-word;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #7bed9f;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .agent-reply {
+            color: #70a1ff;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>AI Voice Agent</h1>
+    <p class="subtitle">Click the mic and start speaking</p>
+    
+    <button class="mic-btn" id="micBtn">🎙️</button>
+    <div class="status" id="statusText">Ready</div>
+    
+    <div class="transcript-box">
+        <span class="label">You said:</span>
+        <div id="userText">-</div>
+        
+        <br>
+        
+        <span class="label agent-reply">Agent replied:</span>
+        <div id="agentText">-</div>
+    </div>
+</div>
+
+<script>
+    // 1. Setup Speech Recognition (Browser API)
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        alert("Speech Recognition API is not supported in this browser. Please use Google Chrome or Microsoft Edge.");
+    }
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+
+    const micBtn = document.getElementById('micBtn');
+    const statusText = document.getElementById('statusText');
+    const userText = document.getElementById('userText');
+    const agentText = document.getElementById('agentText');
+
+    let isListening = false;
+
+    micBtn.addEventListener('click', () => {
+        if (isListening) {
+            recognition.stop();
+        } else {
+            window.speechSynthesis.cancel();
+            recognition.start();
+        }
+    });
+
+    recognition.onstart = () => {
+        isListening = true;
+        micBtn.classList.add('listening');
+        statusText.textContent = "Listening...";
+        userText.textContent = "...";
+        agentText.textContent = "...";
+    };
+
+    recognition.onresult = async (event) => {
+        const transcript = event.results[0][0].transcript;
+        userText.textContent = transcript;
+        statusText.textContent = "Thinking...";
+        
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: transcript })
+            });
+            
+            const data = await response.json();
+            if (data.reply) {
+                agentText.textContent = data.reply;
+                statusText.textContent = "Speaking...";
+                speakText(data.reply);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            statusText.textContent = "Error connecting to server.";
+            agentText.textContent = "Failed to reach backend.";
+        }
+    };
+
+    recognition.onerror = (event) => {
+        statusText.textContent = `Error: ${event.error}`;
+    };
+
+    recognition.onend = () => {
+        isListening = false;
+        micBtn.classList.remove('listening');
+        if (statusText.textContent === "Listening...") {
+            statusText.textContent = "Ready";
+        }
+    };
+
+    function speakText(text) {
+        if (!('speechSynthesis' in window)) {
+            statusText.textContent = "Text-to-speech not supported.";
+            return;
+        }
+        
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        const voices = window.speechSynthesis.getVoices();
+        const preferredVoice = voices.find(voice => voice.name.includes('Google US English') || voice.lang.includes('en-US'));
+        if (preferredVoice) {
+            utterance.voice = preferredVoice;
+        }
+        
+        utterance.onend = () => {
+            statusText.textContent = "Ready";
+        };
+        
+        window.speechSynthesis.speak(utterance);
+    }
+</script>
+
+</body>
+</html>

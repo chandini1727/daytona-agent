@@ -1,6 +1,5 @@
 {
-    "name": "My OpenRouter Agent",
-    "image": "docker.io/chintalachyandini/my-openrouter-agent:1.0",
-    "forwardPorts": [8501],
-    "postStartCommand": "python -m streamlit run /app/app.py --server.port=8501 --server.address=0.0.0.0"
+  "name": "My Voice Agent",
+  "image": "chintalachyandini/my-openrouter-agent:voice4",
+  "postStartCommand": "cd /app && nohup uvicorn pure_voice_agent:app --host 0.0.0.0 --port 8000 > /tmp/server.log 2>&1 &"
 }

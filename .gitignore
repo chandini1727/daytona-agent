@@ -10,7 +10,6 @@ env/
 agent_template_tester.py
 e2b_terminal.py
 run_e2b.py
-terminal_agent.py
 local_agent_base.py
 run_base_terminal.py
 run_opencode.py
@@ -18,3 +17,9 @@ run_opencode.py
 # Ignore any random text or log files
 *.log
 *.txt
+
+# Modal configuration
+.modal*
+modal.toml
+.agents/skills/modal/
+

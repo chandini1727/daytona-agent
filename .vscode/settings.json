@@ -1,0 +1,6 @@
+{
+    "python.defaultInterpreterPath": "c:\\agent\\.venv\\Scripts\\python.exe",
+    "python.analysis.extraPaths": [
+        "c:\\agent\\.venv\\Lib\\site-packages"
+    ]
+}
